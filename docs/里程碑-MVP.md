@@ -1,5 +1,7 @@
 # 岭行 · MVP 里程碑
 
+> 进度同步：2026-10-11 23:42 — CCGS 已迁入；story-001 关卡三段节奏已合入 8ddccb0；下一刀 story-002 导出验证。
+
 > 落盘：2026-10-11（监控侧代写，因产品 Agent 连续回合未调用写文件工具）  
 > 仓库：`E:\cw\Game-Godot`  
 > 目标平台：Android / iOS / HarmonyOS

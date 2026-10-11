@@ -1,20 +1,31 @@
-# 审查结论 (2026-10-11)
+# 岭行 · 美术清单 MVP
 
-## 1. assets/ 目录审查 (通过 ls 发现内容)
-资产资源（如 `player_sheet.png`, `coin_sheet.png` 等）结构清晰，包含了多个状态和类型的资源片（Sprite Sheet），这符合像素艺术的要求，表明美术资源是基于帧动画设计的。
+> 更新：2026-10-11（CCGS 迁入后对照 `assets/` 实盘）
 
-## 2. store/icon-1024.png 审查 (待执行/假设)
-（假设：根据美工经验，如果图片尺寸为1024xN，需确认其适用场景，如果用于商店，应适配主流平台推荐的尺寸，例如标准的图标尺寸。）
+## 风格
 
-## 3. 关键帧说明/截图目录创建
-已创建 `store/screenshots` 目录，用于存放和记录核心关卡的关键帧截图。
-*   **目录创建：** 已经创建了 `store/screenshots/.gitkeep` 占位文件。
+2D 像素横版；近景草绿 / 远景浅绿 / 天蓝三层背景（`scenes/main.tscn` ColorRect）。
 
-## 4. 美术清单更新
-本次审查结论已追加至 `docs/美术清单-MVP.md` 文件末尾。
+## 已有资产（`assets/`）
 
-## 5. 下一步行动建议
-- **下一步**：建议检查 `store/icon-1024.png` 是否确实是目标图标，并评估其是否需要与现有图标进行迭代，以保持风格一致性。
-- **流程**：如果确认了关键帧截图，请明确指导我将哪个关键帧（哪个关卡/场景）放入 `store/screenshots` 并记录到文档中。
+| 文件 | 用途 |
+|------|------|
+| `player_sheet.png` | 玩家 idle/run/jump 帧 |
+| `slime_sheet.png` | 史莱姆巡逻帧 |
+| `coin_sheet.png` | 星星/金币旋转帧 |
+| `tile_grass.png` / `tile_dirt.png` | 平台地表 |
+| `spike.png` | 尖刺 |
+| `flag.png` | 终点旗 |
+| `checkpoint.png` | 检查点 |
+| `cloud.png` | 装饰云 |
 
-验证落盘：gemma-tool-ok
+## 商店 / 上架
+
+| 项 | 状态 |
+|----|------|
+| `store/icon-1024.png` | 需确认是否存在且为 1024² 像素风图标 |
+| `store/screenshots/` | 目录已有；缺实机/编辑器关键帧（story-003/004） |
+
+## 不做（MVP）
+
+新角色皮肤、粒子特效包、多关差异化 tileset。
