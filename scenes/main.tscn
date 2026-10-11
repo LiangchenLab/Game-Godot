@@ -1,69 +1,29 @@
-[gd_scene load_steps=4 format=3 uid="uid://mainlingxing"]
+[gd_scene load_steps=3 format=3 uid="uid://mainlingxing"]
 
 [ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
 [ext_resource type="Script" path="res://scripts/hud.gd" id="2_hud"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.08, 0.1, 0.12, 0.88)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-
 [node name="Main" type="Node2D"]
 
 [node name="Sky" type="ColorRect" parent="."]
-offset_right = 3800.0
+offset_right = 5200.0
 offset_bottom = 720.0
-color = Color(0.545098, 0.737255, 0.858824, 1)
+color = Color(0.494118, 0.768627, 0.909804, 1)
+
+[node name="HillFar" type="ColorRect" parent="."]
+offset_top = 360.0
+offset_right = 5200.0
+offset_bottom = 560.0
+color = Color(0.568627, 0.760784, 0.6, 1)
 
 [node name="Hill" type="ColorRect" parent="."]
-offset_left = 0.0
-offset_top = 430.0
-offset_right = 3800.0
+offset_top = 470.0
+offset_right = 5200.0
 offset_bottom = 720.0
-color = Color(0.486275, 0.690196, 0.478431, 1)
+color = Color(0.352941, 0.619608, 0.376471, 1)
 
 [node name="Level" type="Node2D" parent="."]
 script = ExtResource("1_level")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("2_hud")
-
-[node name="ScoreLabel" type="Label" parent="HUD"]
-offset_left = 24.0
-offset_top = 16.0
-offset_right = 320.0
-offset_bottom = 56.0
-theme_override_colors/font_color = Color(0.12, 0.14, 0.16, 1)
-theme_override_font_sizes/font_size = 28
-text = "星星  0 / 8"
-
-[node name="HintLabel" type="Label" parent="HUD"]
-offset_left = 24.0
-offset_top = 56.0
-offset_right = 640.0
-offset_bottom = 88.0
-theme_override_colors/font_color = Color(0.18, 0.22, 0.26, 1)
-theme_override_font_sizes/font_size = 18
-text = "A D 或方向键移动，空格 / W 跳跃。走到红旗即过关。"
-
-[node name="ClearPanel" type="Panel" parent="HUD"]
-offset_left = 390.0
-offset_top = 220.0
-offset_right = 890.0
-offset_bottom = 460.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
-
-[node name="ClearLabel" type="Label" parent="HUD/ClearPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.96, 0.95, 0.9, 1)
-theme_override_font_sizes/font_size = 36
-text = "到站了"
-horizontal_alignment = 1
-vertical_alignment = 1

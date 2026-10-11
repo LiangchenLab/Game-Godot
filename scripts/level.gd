@@ -1,92 +1,210 @@
 extends Node2D
 
-const GROUND := Color("2f6b4f")
-const STONE := Color("3d4c59")
-const COIN := Color("f2c14e")
-const FLAG := Color("e24b4b")
+const GRASS := preload("res://assets/tile_grass.png")
+const DIRT := preload("res://assets/tile_dirt.png")
+const SPIKE_TEX := preload("res://assets/spike.png")
+const COIN_TEX := preload("res://assets/coin_sheet.png")
+const FLAG_TEX := preload("res://assets/flag.png")
+const CHECK_TEX := preload("res://assets/checkpoint.png")
+const CLOUD_TEX := preload("res://assets/cloud.png")
+const SLIME_TEX := preload("res://assets/slime_sheet.png")
+
+var coin_total := 0
 
 func _ready() -> void:
+	_clouds()
 	_build()
+	call_deferred("_announce")
+
+func _announce() -> void:
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud:
+		hud.set_total(coin_total)
+
+func _clouds() -> void:
+	for pos in [Vector2(180, 120), Vector2(860, 80), Vector2(1700, 140), Vector2(2600, 90), Vector2(3600, 130), Vector2(4500, 70)]:
+		var cloud := Sprite2D.new()
+		cloud.texture = CLOUD_TEX
+		cloud.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		cloud.position = pos
+		cloud.scale = Vector2(2, 2)
+		cloud.z_index = -5
+		add_child(cloud)
 
 func _build() -> void:
-	_platform(Vector2(420, 560), Vector2(780, 48), GROUND)
-	_platform(Vector2(1180, 500), Vector2(280, 40), STONE)
-	_platform(Vector2(1560, 420), Vector2(220, 36), STONE)
-	_moving_platform(Vector2(1960, 470))
-	_platform(Vector2(2420, 400), Vector2(260, 36), STONE)
-	_platform(Vector2(2860, 500), Vector2(420, 48), GROUND)
-	_platform(Vector2(3400, 560), Vector2(520, 48), GROUND)
-
-	for coin_pos in [
-		Vector2(520, 470), Vector2(760, 430), Vector2(1180, 430),
-		Vector2(1560, 350), Vector2(1960, 390), Vector2(2300, 330),
-		Vector2(2580, 330), Vector2(3100, 430),
+	_run(0, 22, 560)
+	_run(820, 10, 560)
+	_spikes(980, 560)
+	_run(1280, 6, 430)
+	_run(1680, 14, 560)
+	_moving(Vector2(2320, 470))
+	_run(2580, 8, 400)
+	_checkpoint(Vector2(2700, 368))
+	_run(3000, 12, 560)
+	_slime(Vector2(3200, 520), 3000, 3340)
+	_spikes(3360, 560)
+	_run(3600, 4, 460)
+	_run(3920, 4, 380)
+	_run(4240, 12, 560)
+	_goal(Vector2(4560, 500))
+	_pit(Vector2(2500, 980), Vector2(5200, 80))
+	for pos in [
+		Vector2(240, 490), Vector2(420, 450), Vector2(900, 490),
+		Vector2(1360, 360), Vector2(1480, 360), Vector2(1900, 490),
+		Vector2(2100, 430), Vector2(2320, 390), Vector2(2700, 320),
+		Vector2(3120, 490), Vector2(3680, 390), Vector2(4000, 310),
 	]:
-		_coin(coin_pos)
+		_coin(pos)
+	_spawn(Vector2(80, 512))
 
-	_goal(Vector2(3520, 500))
-	_pit(Vector2(2000, 980), Vector2(4200, 80))
-	_spawn_player(Vector2(120, 500))
-
-func _spawn_player(at: Vector2) -> void:
+func _spawn(at: Vector2) -> void:
 	var player := preload("res://scenes/player.tscn").instantiate()
 	player.position = at
 	add_child(player)
 
-func _platform(center: Vector2, size: Vector2, color: Color) -> void:
+func _run(x: int, tiles: int, top: int) -> void:
+	for i in tiles:
+		var grass := Sprite2D.new()
+		grass.texture = GRASS
+		grass.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		grass.position = Vector2(x + 16 + i * 32, top)
+		add_child(grass)
+		var dirt := Sprite2D.new()
+		dirt.texture = DIRT
+		dirt.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		dirt.position = Vector2(x + 16 + i * 32, top + 32)
+		add_child(dirt)
+	var size := Vector2(tiles * 32, 64)
+	_solid(Vector2(x + size.x * 0.5, top + 16), size)
+
+func _solid(center: Vector2, size: Vector2) -> void:
 	var body := StaticBody2D.new()
 	body.position = center
-	body.add_child(_box_visual(size, color))
-	body.add_child(_box_shape(size))
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = size
+	shape.shape = rect
+	body.add_child(shape)
 	add_child(body)
 
-func _moving_platform(center: Vector2) -> void:
-	var body := AnimatableBody2D.new()
-	body.position = center
-	body.set_script(preload("res://scripts/moving_platform.gd"))
-	var size := Vector2(160, 28)
-	body.add_child(_box_visual(size, Color("d08a3a")))
-	body.add_child(_box_shape(size))
-	add_child(body)
+func _spikes(x: int, surface_top: int) -> void:
+	var area := Area2D.new()
+	area.position = Vector2(x + 16, surface_top - 16)
+	area.collision_layer = 4
+	area.collision_mask = 2
+	area.set_script(preload("res://scripts/pit.gd"))
+	var vis := Sprite2D.new()
+	vis.texture = SPIKE_TEX
+	vis.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = Vector2(28, 16)
+	shape.position = Vector2(0, 8)
+	shape.shape = rect
+	area.add_child(vis)
+	area.add_child(shape)
+	add_child(area)
 
 func _coin(at: Vector2) -> void:
+	coin_total += 1
 	var area := Area2D.new()
 	area.position = at
 	area.collision_layer = 4
 	area.collision_mask = 2
 	area.set_script(preload("res://scripts/coin.gd"))
-	var vis := Polygon2D.new()
-	vis.color = COIN
-	vis.polygon = PackedVector2Array([
-		Vector2(0, -12), Vector2(10, 0), Vector2(0, 12), Vector2(-10, 0)
-	])
+	var vis := AnimatedSprite2D.new()
+	vis.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	vis.scale = Vector2(2, 2)
+	var frames := SpriteFrames.new()
+	frames.add_animation("spin")
+	frames.set_animation_loop("spin", true)
+	frames.set_animation_speed("spin", 6.0)
+	for i in 2:
+		var atlas := AtlasTexture.new()
+		atlas.atlas = COIN_TEX
+		atlas.region = Rect2(i * 16, 0, 16, 16)
+		frames.add_frame("spin", atlas)
+	vis.sprite_frames = frames
+	vis.play("spin")
 	var shape := CollisionShape2D.new()
 	var circle := CircleShape2D.new()
-	circle.radius = 12.0
+	circle.radius = 14.0
 	shape.shape = circle
 	area.add_child(vis)
 	area.add_child(shape)
 	add_child(area)
 
 func _goal(at: Vector2) -> void:
+	var area := _marker(at, FLAG_TEX, preload("res://scripts/goal.gd"))
+	add_child(area)
+
+func _checkpoint(at: Vector2) -> void:
+	add_child(_marker(at, CHECK_TEX, preload("res://scripts/checkpoint.gd")))
+
+func _marker(at: Vector2, tex: Texture2D, script: Script) -> Area2D:
 	var area := Area2D.new()
 	area.position = at
 	area.collision_layer = 4
 	area.collision_mask = 2
-	area.set_script(preload("res://scripts/goal.gd"))
-	var pole := Polygon2D.new()
-	pole.color = Color("f4f1ea")
-	pole.polygon = PackedVector2Array([Vector2(-3, -70), Vector2(3, -70), Vector2(3, 20), Vector2(-3, 20)])
-	var flag := Polygon2D.new()
-	flag.color = FLAG
-	flag.polygon = PackedVector2Array([Vector2(3, -70), Vector2(36, -56), Vector2(3, -42)])
+	area.set_script(script)
+	var vis := Sprite2D.new()
+	vis.texture = tex
+	vis.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	vis.scale = Vector2(2, 2)
+	vis.position = Vector2(0, -24)
 	var shape := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
-	rect.size = Vector2(40, 90)
-	shape.position = Vector2(8, -25)
+	rect.size = Vector2(36, 80)
+	shape.position = Vector2(8, -16)
 	shape.shape = rect
-	area.add_child(pole)
-	area.add_child(flag)
+	area.add_child(vis)
+	area.add_child(shape)
+	return area
+
+func _moving(at: Vector2) -> void:
+	var body := AnimatableBody2D.new()
+	body.position = at
+	body.set_script(preload("res://scripts/moving_platform.gd"))
+	var vis := Sprite2D.new()
+	vis.texture = GRASS
+	vis.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	vis.scale = Vector2(5, 1)
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = Vector2(160, 32)
+	shape.shape = rect
+	body.add_child(vis)
+	body.add_child(shape)
+	add_child(body)
+
+func _slime(at: Vector2, left: float, right: float) -> void:
+	var area := Area2D.new()
+	area.position = at
+	area.collision_layer = 4
+	area.collision_mask = 2
+	area.set_script(preload("res://scripts/enemy.gd"))
+	area.set("left_limit", left)
+	area.set("right_limit", right)
+	var vis := AnimatedSprite2D.new()
+	vis.name = "Sprite"
+	vis.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	vis.scale = Vector2(2, 2)
+	var frames := SpriteFrames.new()
+	frames.add_animation("crawl")
+	frames.set_animation_loop("crawl", true)
+	frames.set_animation_speed("crawl", 4.0)
+	for i in 2:
+		var atlas := AtlasTexture.new()
+		atlas.atlas = SLIME_TEX
+		atlas.region = Rect2(i * 32, 0, 32, 24)
+		frames.add_frame("crawl", atlas)
+	vis.sprite_frames = frames
+	vis.play("crawl")
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = Vector2(40, 28)
+	shape.shape = rect
+	area.add_child(vis)
 	area.add_child(shape)
 	add_child(area)
 
@@ -96,22 +214,9 @@ func _pit(center: Vector2, size: Vector2) -> void:
 	area.collision_layer = 4
 	area.collision_mask = 2
 	area.set_script(preload("res://scripts/pit.gd"))
-	area.add_child(_box_shape(size))
-	add_child(area)
-
-func _box_visual(size: Vector2, color: Color) -> Polygon2D:
-	var vis := Polygon2D.new()
-	vis.color = color
-	var half := size * 0.5
-	vis.polygon = PackedVector2Array([
-		Vector2(-half.x, -half.y), Vector2(half.x, -half.y),
-		Vector2(half.x, half.y), Vector2(-half.x, half.y),
-	])
-	return vis
-
-func _box_shape(size: Vector2) -> CollisionShape2D:
 	var shape := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
 	rect.size = size
 	shape.shape = rect
-	return shape
+	area.add_child(shape)
+	add_child(area)
