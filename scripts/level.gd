@@ -210,7 +210,8 @@ func _slime(at: Vector2, left: float, right: float) -> void:
 	for i in 2:
 		var atlas := AtlasTexture.new()
 		atlas.atlas = SLIME_TEX
-		atlas.region = Rect2(i * 32, 0, 32, 24)
+		# Kenney 角色帧 32×32（旧版史莱姆条带曾为 32×24）
+		atlas.region = Rect2(i * 32, 0, 32, 32)
 		frames.add_frame("crawl", atlas)
 	vis.sprite_frames = frames
 	vis.play("crawl")
