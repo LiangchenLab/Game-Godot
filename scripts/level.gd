@@ -13,6 +13,7 @@ const CHECK_TEX := preload("res://assets/checkpoint.png")
 const CLOUD_TEX := preload("res://assets/cloud.png")
 const SLIME_TEX := preload("res://assets/slime_sheet.png")
 const BG_FAR := preload("res://assets/bg_far.png")
+const BG_SKY := preload("res://assets/bg_sky_tile.png")
 const SUN_TEX := preload("res://assets/sun.png")
 const TREE_TEX := preload("res://assets/decor_tree.png")
 const PINE_TEX := preload("res://assets/decor_pine.png")
@@ -31,57 +32,72 @@ func _announce() -> void:
 	if hud:
 		hud.set_total(coin_total)
 
-## 远景：太阳 + 重复山景条 + 云层（z 在平台后）
+## 远景：行业横版标配 = 平铺天空图案 + 中景条 + 云 + 太阳（多层 z）
 func _scenery() -> void:
+	# 天空无缝平铺（Pixel Adventure Background/Blue）
+	var tile_w := BG_SKY.get_width() * 1.5
+	var tile_h := BG_SKY.get_height() * 1.5
+	var y := 0.0
+	while y < 520.0:
+		var x := -64.0
+		while x < 5400.0:
+			var sky := Sprite2D.new()
+			sky.texture = BG_SKY
+			sky.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			sky.centered = false
+			sky.position = Vector2(x, y)
+			sky.scale = Vector2(1.5, 1.5)
+			sky.z_index = -25
+			add_child(sky)
+			x += tile_w
+		y += tile_h
+
 	var sun := Sprite2D.new()
 	sun.texture = SUN_TEX
 	sun.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	sun.position = Vector2(980, 110)
-	sun.scale = Vector2(2.2, 2.2)
-	sun.z_index = -20
+	sun.position = Vector2(1080, 100)
+	sun.scale = Vector2(2.4, 2.4)
+	sun.z_index = -22
 	add_child(sun)
 
-	# 远景山带：沿关卡横向平铺
-	var far_w := BG_FAR.get_width() * 2.5
+	var far_w := BG_FAR.get_width() * 2.2
 	var x := -80.0
 	while x < 5200.0:
 		var hill := Sprite2D.new()
 		hill.texture = BG_FAR
 		hill.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		hill.centered = false
-		hill.position = Vector2(x, 280)
-		hill.scale = Vector2(2.5, 2.2)
-		hill.modulate = Color(0.85, 0.92, 0.88, 0.95)
-		hill.z_index = -15
+		hill.position = Vector2(x, 300)
+		hill.scale = Vector2(2.2, 2.0)
+		hill.modulate = Color(0.75, 0.9, 0.8, 0.85)
+		hill.z_index = -18
 		add_child(hill)
-		x += far_w * 0.85
+		x += far_w * 0.9
 
-	# 中景再铺一层略深、略低，做出景深
 	x = -40.0
 	while x < 5200.0:
 		var mid := Sprite2D.new()
 		mid.texture = BG_FAR
 		mid.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		mid.centered = false
-		mid.position = Vector2(x, 360)
-		mid.scale = Vector2(2.0, 1.8)
-		mid.modulate = Color(0.55, 0.72, 0.58, 0.75)
-		mid.z_index = -12
+		mid.position = Vector2(x, 380)
+		mid.scale = Vector2(1.8, 1.6)
+		mid.modulate = Color(0.5, 0.7, 0.55, 0.7)
+		mid.z_index = -14
 		add_child(mid)
-		x += far_w * 0.7
+		x += far_w * 0.75
 
 	for pos in [
-		Vector2(160, 100), Vector2(520, 70), Vector2(980, 120), Vector2(1400, 60),
-		Vector2(1900, 95), Vector2(2500, 75), Vector2(3100, 110), Vector2(3700, 65),
-		Vector2(4300, 90), Vector2(4900, 80),
+		Vector2(200, 90), Vector2(560, 60), Vector2(980, 110), Vector2(1500, 55),
+		Vector2(2000, 85), Vector2(2600, 70), Vector2(3200, 100), Vector2(3800, 60),
+		Vector2(4400, 95), Vector2(5000, 75),
 	]:
 		var cloud := Sprite2D.new()
 		cloud.texture = CLOUD_TEX
 		cloud.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		cloud.position = pos
-		cloud.scale = Vector2(1.6, 1.4)
-		cloud.modulate = Color(1, 1, 1, 0.9)
-		cloud.z_index = -10
+		cloud.scale = Vector2(2.0, 1.8)
+		cloud.z_index = -12
 		add_child(cloud)
 
 func _build() -> void:

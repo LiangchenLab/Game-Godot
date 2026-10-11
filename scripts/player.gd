@@ -6,6 +6,7 @@ const JUMP_VELOCITY := -520.0
 const COYOTE_TIME := 0.1
 ## 手感：落地前按跳，落地立即起跳
 const JUMP_BUFFER := 0.1
+const SPRITE_SCALE := 2.2
 
 var score := 0
 var spawn_position := Vector2.ZERO
@@ -19,10 +20,11 @@ func _ready() -> void:
 	add_to_group("player")
 	spawn_position = global_position
 	_setup_frames()
+	sprite.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE)
 	sprite.play("idle")
 
+## Pixel Adventure：Idle/Run/Jump 分表加载（行业常用多帧动画，不再 6 格拼凑）
 func _setup_frames() -> void:
-	var tex: Texture2D = load("res://assets/player_sheet.png")
 	var frames := SpriteFrames.new()
 	frames.add_animation("idle")
 	frames.add_animation("run")
@@ -30,19 +32,26 @@ func _setup_frames() -> void:
 	frames.set_animation_loop("idle", true)
 	frames.set_animation_loop("run", true)
 	frames.set_animation_loop("jump", false)
-	frames.set_animation_speed("idle", 4.0)
-	frames.set_animation_speed("run", 10.0)
-	frames.add_frame("idle", _atlas(tex, 0))
-	for i in range(1, 5):
-		frames.add_frame("run", _atlas(tex, i))
-	frames.add_frame("jump", _atlas(tex, 5))
-	sprite.sprite_frames = frames
+	frames.set_animation_speed("idle", 12.0)
+	frames.set_animation_speed("run", 16.0)
+	frames.set_animation_speed("jump", 8.0)
 
-func _atlas(tex: Texture2D, index: int) -> AtlasTexture:
-	var atlas := AtlasTexture.new()
-	atlas.atlas = tex
-	atlas.region = Rect2(index * 32, 0, 32, 32)
-	return atlas
+	_add_strip(frames, "idle", "res://assets/player_idle.png", 32)
+	_add_strip(frames, "run", "res://assets/player_run.png", 32)
+	_add_strip(frames, "jump", "res://assets/player_jump.png", 32)
+	sprite.sprite_frames = frames
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+func _add_strip(frames: SpriteFrames, anim: String, path: String, frame_w: int) -> void:
+	var tex: Texture2D = load(path)
+	if tex == null:
+		return
+	var n := maxi(1, int(tex.get_width() / frame_w))
+	for i in n:
+		var atlas := AtlasTexture.new()
+		atlas.atlas = tex
+		atlas.region = Rect2(i * frame_w, 0, frame_w, tex.get_height())
+		frames.add_frame(anim, atlas)
 
 func _physics_process(delta: float) -> void:
 	if not playing:
@@ -62,7 +71,6 @@ func _physics_process(delta: float) -> void:
 	else:
 		jump_buffer_timer = maxf(jump_buffer_timer - delta, 0.0)
 
-	# Coyote + 跳跃缓冲：满足其一即可起跳（落地不丢缓冲意图）
 	if jump_buffer_timer > 0.0 and (on_floor or coyote_timer > 0.0):
 		velocity.y = JUMP_VELOCITY
 		jump_buffer_timer = 0.0
@@ -71,7 +79,7 @@ func _physics_process(delta: float) -> void:
 	var direction := Input.get_axis("move_left", "move_right")
 	if direction:
 		velocity.x = direction * SPEED
-		sprite.scale.x = -2.0 if direction < 0.0 else 2.0
+		sprite.scale.x = (-SPRITE_SCALE) if direction < 0.0 else SPRITE_SCALE
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, SPEED)
 	if not is_on_floor():
