@@ -32,27 +32,41 @@ func _clouds() -> void:
 		add_child(cloud)
 
 func _build() -> void:
-	_run(0, 22, 560)
-	_run(820, 10, 560)
-	_spikes(980, 560)
-	_run(1280, 6, 430)
-	_run(1680, 14, 560)
-	_moving(Vector2(2320, 470))
-	_run(2580, 8, 400)
-	_checkpoint(Vector2(2700, 368))
-	_run(3000, 12, 560)
-	_slime(Vector2(3200, 520), 3000, 3340)
-	_spikes(3360, 560)
-	_run(3600, 4, 460)
-	_run(3920, 4, 380)
-	_run(4240, 12, 560)
-	_goal(Vector2(4560, 500))
-	_pit(Vector2(2500, 980), Vector2(5200, 80))
+	# Act1 教学：长平地 + 星星引导；首缺口后再放单尖刺（避免第一跳即死）
+	_run(0, 28, 560)
+	_run(1000, 6, 560)
+	_run(1280, 10, 560)
+	_spikes(1480, 560)
+
+	# Act2 加压：高台 → 移动平台 → 检查点 → 史莱姆 + 尖刺
+	_run(1680, 6, 430)
+	_run(2000, 12, 560)
+	_moving(Vector2(2480, 470))
+	_run(2740, 8, 400)
+	_checkpoint(Vector2(2860, 368))
+	_run(3120, 14, 560)
+	_slime(Vector2(3360, 520), 3160, 3500)
+	_spikes(3520, 560)
+	_spikes(3580, 560)
+
+	# Act3 收尾：三级阶梯上升 + 落地大平台过旗
+	_run(3760, 4, 480)
+	_run(4000, 4, 400)
+	_run(4240, 4, 320)
+	_run(4480, 12, 560)
+	_goal(Vector2(4760, 500))
+	_pit(Vector2(2600, 980), Vector2(5400, 80))
+
 	for pos in [
-		Vector2(240, 490), Vector2(420, 450), Vector2(900, 490),
-		Vector2(1360, 360), Vector2(1480, 360), Vector2(1900, 490),
-		Vector2(2100, 430), Vector2(2320, 390), Vector2(2700, 320),
-		Vector2(3120, 490), Vector2(3680, 390), Vector2(4000, 310),
+		# Act1 地上引导星
+		Vector2(220, 490), Vector2(420, 490), Vector2(680, 490),
+		Vector2(1100, 490), Vector2(1400, 490),
+		# Act2
+		Vector2(1760, 360), Vector2(1880, 360), Vector2(2200, 490),
+		Vector2(2480, 390), Vector2(2860, 320), Vector2(3280, 490),
+		# Act3 收尾星
+		Vector2(3840, 410), Vector2(4080, 330), Vector2(4320, 250),
+		Vector2(4600, 490), Vector2(4700, 490),
 	]:
 		_coin(pos)
 	_spawn(Vector2(80, 512))

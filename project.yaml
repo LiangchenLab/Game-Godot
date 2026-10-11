@@ -1,0 +1,43 @@
+# CCGS project configuration — 岭行 (Game-Godot)
+# Schema: .claude/docs/effects-map.md
+# Per-developer overrides: project.local.yaml (gitignored)
+
+schema_version: 1
+
+framework:
+  version: 1.1.3
+  last_upgraded: 2026-10-11
+
+project:
+  name: 岭行
+  codename: ridge-run
+  one_liner: 2D 横版跳跃：沿山路向右跑，躲缺口/尖刺/史莱姆，收集星星，到红旗过关。
+  repo_root: .
+
+engine:
+  id: godot
+  version: "4.7"
+  language: gdscript
+
+specialists:
+  primary: godot-specialist
+
+platforms:
+  - android
+  - ios
+  - harmonyos
+
+# /start 会写入 modes；此处预置符合你要的「少问、多做事」
+# 仅允许 rigor + automation（勿写入 rigor 展开的六个子旋钮）
+modes:
+  rigor: minimal
+  automation: autonomous
+
+# 现有可玩一关基线（迁入前已有）
+baseline:
+  playable_level: true
+  entry_scene: scenes/main.tscn
+  notes: >
+    已有玩家/检查点/尖刺/史莱姆/星星/红旗/触屏按钮/HUD。
+    P1 已加 Coyote/Jump Buffer（scripts/player.gd）。
+    中文 MVP 文档在 docs/*-MVP.md，作 brief 输入而非流水线终点。

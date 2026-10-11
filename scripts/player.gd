@@ -2,10 +2,16 @@ extends CharacterBody2D
 
 const SPEED := 260.0
 const JUMP_VELOCITY := -520.0
+## 手感：离台后仍可起跳（关卡设计-MVP 80–120ms）
+const COYOTE_TIME := 0.1
+## 手感：落地前按跳，落地立即起跳
+const JUMP_BUFFER := 0.1
 
 var score := 0
 var spawn_position := Vector2.ZERO
 var playing := false
+var coyote_timer := 0.0
+var jump_buffer_timer := 0.0
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 
@@ -43,10 +49,25 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		sprite.play("idle")
 		return
-	if not is_on_floor():
+
+	var on_floor := is_on_floor()
+	if on_floor:
+		coyote_timer = COYOTE_TIME
+	else:
+		coyote_timer = maxf(coyote_timer - delta, 0.0)
 		velocity += get_gravity() * delta
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+
+	if Input.is_action_just_pressed("jump"):
+		jump_buffer_timer = JUMP_BUFFER
+	else:
+		jump_buffer_timer = maxf(jump_buffer_timer - delta, 0.0)
+
+	# Coyote + 跳跃缓冲：满足其一即可起跳（落地不丢缓冲意图）
+	if jump_buffer_timer > 0.0 and (on_floor or coyote_timer > 0.0):
 		velocity.y = JUMP_VELOCITY
+		jump_buffer_timer = 0.0
+		coyote_timer = 0.0
+
 	var direction := Input.get_axis("move_left", "move_right")
 	if direction:
 		velocity.x = direction * SPEED
