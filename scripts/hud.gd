@@ -5,6 +5,7 @@ var score := 0
 var started := false
 
 var score_label: Label
+var hint_label: Label
 var start_panel: Panel
 var pause_panel: Panel
 var clear_panel: Panel
@@ -37,17 +38,17 @@ func show_clear(found: int) -> void:
 
 func _build() -> void:
 	score_label = Label.new()
-	score_label.position = Vector2(24, 16)
-	score_label.add_theme_font_size_override("font_size", 28)
-	score_label.add_theme_color_override("font_color", Color(0.12, 0.16, 0.2))
+	score_label.position = Vector2(24, 18)
+	score_label.add_theme_font_size_override("font_size", 30)
+	score_label.add_theme_color_override("font_color", Color(1, 1, 1))
+	score_label.add_theme_color_override("font_outline_color", Color(0.1, 0.15, 0.2))
+	score_label.add_theme_constant_override("outline_size", 6)
 	add_child(score_label)
 
-	var hint := Label.new()
-	hint.position = Vector2(24, 52)
-	hint.text = "A D 移动，空格跳跃。手机用屏幕下方按钮。Esc 暂停。"
-	hint.add_theme_font_size_override("font_size", 18)
-	hint.add_theme_color_override("font_color", Color(0.16, 0.2, 0.24))
-	add_child(hint)
+	# 操作说明只放开局面板，避免一直挡画面
+	hint_label = Label.new()
+	hint_label.visible = false
+	add_child(hint_label)
 
 	var pause_button := Button.new()
 	pause_button.text = "暂停"
@@ -66,11 +67,11 @@ func _build() -> void:
 	title.add_theme_color_override("font_color", Color(0.96, 0.95, 0.9))
 	start_panel.add_child(title)
 	var sub := Label.new()
-	sub.text = "沿山路跑到红旗"
-	sub.position = Vector2(0, 140)
-	sub.size = Vector2(600, 40)
+	sub.text = "沿山路跑到红旗\nA/D 移动 · 空格跳跃 · Esc 暂停"
+	sub.position = Vector2(40, 130)
+	sub.size = Vector2(520, 80)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub.add_theme_font_size_override("font_size", 24)
+	sub.add_theme_font_size_override("font_size", 22)
 	sub.add_theme_color_override("font_color", Color(0.9, 0.9, 0.86))
 	start_panel.add_child(sub)
 	var start_button := Button.new()
