@@ -1,22 +1,23 @@
 extends Node2D
 
-## 岭行关卡：Kenney 像素资源 + 远景/装饰铺陈（画面不能只剩色条+一条平台）
+## 岭行关卡：对标经典横版层次（青空/山/灌木/云）+ Pixel Adventure 前景；非任天堂素材
 
 const GRASS_L := preload("res://assets/tile_grass_l.png")
 const GRASS_M := preload("res://assets/tile_grass_m.png")
 const GRASS_R := preload("res://assets/tile_grass_r.png")
 const DIRT := preload("res://assets/tile_dirt.png")
+const STONE := preload("res://assets/tile_stone.png")
 const SPIKE_TEX := preload("res://assets/spike.png")
 const COIN_TEX := preload("res://assets/coin_sheet.png")
 const FLAG_TEX := preload("res://assets/flag.png")
 const CHECK_TEX := preload("res://assets/checkpoint.png")
 const CLOUD_TEX := preload("res://assets/cloud.png")
 const SLIME_TEX := preload("res://assets/slime_sheet.png")
-const BG_FAR := preload("res://assets/bg_far.png")
 const BG_SKY := preload("res://assets/bg_sky_tile.png")
+const BG_MOUNTAINS := preload("res://assets/bg_mountains.png")
+const BG_BUSHES := preload("res://assets/bg_bushes.png")
 const SUN_TEX := preload("res://assets/sun.png")
-const TREE_TEX := preload("res://assets/decor_tree.png")
-const PINE_TEX := preload("res://assets/decor_pine.png")
+const PIPE_TEX := preload("res://assets/pipe.png")
 const BUSH_TEX := preload("res://assets/decor_bush.png")
 const MUSH_TEX := preload("res://assets/decor_mushroom.png")
 
@@ -32,113 +33,115 @@ func _announce() -> void:
 	if hud:
 		hud.set_total(coin_total)
 
-## 远景：行业横版标配 = 平铺天空图案 + 中景条 + 云 + 太阳（多层 z）
+## 远景分层（对标经典横版读图顺序）：青空 → 山 → 灌木剪影 → 云/太阳 → 玩法层
 func _scenery() -> void:
-	# 天空无缝平铺（Pixel Adventure Background/Blue）
-	var tile_w := BG_SKY.get_width() * 1.5
-	var tile_h := BG_SKY.get_height() * 1.5
-	var y := 0.0
-	while y < 520.0:
-		var x := -64.0
-		while x < 5400.0:
-			var sky := Sprite2D.new()
-			sky.texture = BG_SKY
-			sky.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-			sky.centered = false
-			sky.position = Vector2(x, y)
-			sky.scale = Vector2(1.5, 1.5)
-			sky.z_index = -25
-			add_child(sky)
-			x += tile_w
-		y += tile_h
+	# 纯色青空（禁止格子贴图铺满）
+	var x := -64.0
+	while x < 5400.0:
+		var sky := Sprite2D.new()
+		sky.texture = BG_SKY
+		sky.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		sky.centered = false
+		sky.position = Vector2(x, 0)
+		sky.scale = Vector2(20, 9) # 大块铺色，看不出格子
+		sky.z_index = -30
+		add_child(sky)
+		x += 64 * 20
 
 	var sun := Sprite2D.new()
 	sun.texture = SUN_TEX
 	sun.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	sun.position = Vector2(1080, 100)
-	sun.scale = Vector2(2.4, 2.4)
-	sun.z_index = -22
+	sun.position = Vector2(1100, 90)
+	sun.scale = Vector2(2.6, 2.6)
+	sun.z_index = -28
 	add_child(sun)
 
-	var far_w := BG_FAR.get_width() * 2.2
-	var x := -80.0
-	while x < 5200.0:
-		var hill := Sprite2D.new()
-		hill.texture = BG_FAR
-		hill.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		hill.centered = false
-		hill.position = Vector2(x, 300)
-		hill.scale = Vector2(2.2, 2.0)
-		hill.modulate = Color(0.75, 0.9, 0.8, 0.85)
-		hill.z_index = -18
-		add_child(hill)
-		x += far_w * 0.9
-
-	x = -40.0
-	while x < 5200.0:
-		var mid := Sprite2D.new()
-		mid.texture = BG_FAR
-		mid.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		mid.centered = false
-		mid.position = Vector2(x, 380)
-		mid.scale = Vector2(1.8, 1.6)
-		mid.modulate = Color(0.5, 0.7, 0.55, 0.7)
-		mid.z_index = -14
-		add_child(mid)
-		x += far_w * 0.75
-
 	for pos in [
-		Vector2(200, 90), Vector2(560, 60), Vector2(980, 110), Vector2(1500, 55),
-		Vector2(2000, 85), Vector2(2600, 70), Vector2(3200, 100), Vector2(3800, 60),
-		Vector2(4400, 95), Vector2(5000, 75),
+		Vector2(180, 100), Vector2(520, 70), Vector2(900, 120), Vector2(1400, 60),
+		Vector2(1900, 95), Vector2(2500, 75), Vector2(3100, 110), Vector2(3700, 65),
+		Vector2(4300, 90), Vector2(4900, 80),
 	]:
 		var cloud := Sprite2D.new()
 		cloud.texture = CLOUD_TEX
 		cloud.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		cloud.position = pos
-		cloud.scale = Vector2(2.0, 1.8)
-		cloud.z_index = -12
+		cloud.scale = Vector2(2.2, 2.0)
+		cloud.z_index = -26
 		add_child(cloud)
 
+	var mw := BG_MOUNTAINS.get_width() * 1.8
+	x = -100.0
+	while x < 5200.0:
+		var m := Sprite2D.new()
+		m.texture = BG_MOUNTAINS
+		m.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		m.centered = false
+		m.position = Vector2(x, 250)
+		m.scale = Vector2(1.8, 1.7)
+		m.z_index = -20
+		add_child(m)
+		x += mw * 0.92
+
+	var bw := BG_BUSHES.get_width() * 1.6
+	x = -60.0
+	while x < 5200.0:
+		var b := Sprite2D.new()
+		b.texture = BG_BUSHES
+		b.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		b.centered = false
+		b.position = Vector2(x, 455)
+		b.scale = Vector2(1.6, 1.5)
+		b.z_index = -10
+		add_child(b)
+		x += bw * 0.88
+
 func _build() -> void:
-	# Act1 教学
+	# Act1 教学：长平地 + 管子地标 + 成排苹果（经典横版引导）
 	_run(0, 28, 560)
-	_decor_row(0, 28, 560, 0.35)
+	_pipe(Vector2(720, 464))
+	_decor_row(0, 28, 560, 0.55)
 	_run(1000, 6, 560)
 	_run(1280, 10, 560)
-	_decor_row(1280, 10, 560, 0.4)
+	_decor_row(1280, 10, 560, 0.5)
 	_spikes(1480, 560)
 
-	# Act2 加压
+	# Act2：石砖踏脚 + 高台 + 检查点 + 敌人
 	_run(1680, 6, 430)
-	_decor_row(1680, 6, 430, 0.5)
+	_stone_stack(1880, 494, 3, 2)
+	_decor_row(1680, 6, 430, 0.55)
 	_run(2000, 12, 560)
-	_decor_row(2000, 12, 560, 0.3)
+	_pipe(Vector2(2280, 464))
+	_decor_row(2000, 12, 560, 0.4)
 	_moving(Vector2(2480, 470))
 	_run(2740, 8, 400)
 	_checkpoint(Vector2(2860, 368))
 	_run(3120, 14, 560)
-	_decor_row(3120, 14, 560, 0.25)
+	_decor_row(3120, 14, 560, 0.35)
 	_slime(Vector2(3360, 520), 3160, 3500)
 	_spikes(3520, 560)
 	_spikes(3580, 560)
 
-	# Act3 收尾
+	# Act3
 	_run(3760, 4, 480)
 	_run(4000, 4, 400)
 	_run(4240, 4, 320)
 	_run(4480, 12, 560)
-	_decor_row(4480, 12, 560, 0.45)
-	_goal(Vector2(4760, 500))
+	_pipe(Vector2(4680, 464))
+	_decor_row(4480, 12, 560, 0.5)
+	_goal(Vector2(4860, 500))
 	_pit(Vector2(2600, 980), Vector2(5400, 80))
 
+	# 成排收集物（经典横版密度）
+	for i in 8:
+		_coin(Vector2(160 + i * 36, 470))
+	for i in 6:
+		_coin(Vector2(1320 + i * 36, 470))
+	for i in 5:
+		_coin(Vector2(1760 + i * 36, 350))
 	for pos in [
-		Vector2(220, 490), Vector2(420, 490), Vector2(680, 490),
-		Vector2(1100, 490), Vector2(1400, 490),
-		Vector2(1760, 360), Vector2(1880, 360), Vector2(2200, 490),
-		Vector2(2480, 390), Vector2(2860, 320), Vector2(3280, 490),
-		Vector2(3840, 410), Vector2(4080, 330), Vector2(4320, 250),
-		Vector2(4600, 490), Vector2(4700, 490),
+		Vector2(2200, 490), Vector2(2480, 390), Vector2(2860, 320),
+		Vector2(3280, 490), Vector2(3840, 410), Vector2(4080, 330),
+		Vector2(4320, 250), Vector2(4600, 490), Vector2(4780, 490),
 	]:
 		_coin(pos)
 	_spawn(Vector2(80, 512))
@@ -162,29 +165,31 @@ func _run(x: int, tiles: int, top: int) -> void:
 	var size := Vector2(tiles * 32, 96)
 	_solid(Vector2(x + size.x * 0.5, top + 32), size)
 
-## 平台上稀疏摆树/灌木/蘑菇（不挡关键路径）
+## 平台上前景点缀：箱子/苹果状装饰（远景灌木已在 _scenery）
 func _decor_row(x: int, tiles: int, top: int, density: float) -> void:
 	var step := 3 if density < 0.35 else 2
-	var i := 1
-	while i < tiles - 1:
+	var i := 2
+	while i < tiles - 2:
 		if randf() > density:
 			i += step
 			continue
-		var kind := i % 4
-		var tex: Texture2D = BUSH_TEX
-		var sc := 2.0
-		if kind == 0:
-			tex = TREE_TEX
-			sc = 2.4
-		elif kind == 1:
-			tex = PINE_TEX
-			sc = 2.4
-		elif kind == 2:
-			tex = MUSH_TEX
-			sc = 1.8
-		var spr := _sprite(tex, Vector2(x + 16 + i * 32, top - 20), sc, -1)
+		var tex: Texture2D = BUSH_TEX if (i % 2 == 0) else MUSH_TEX
+		var spr := _sprite(tex, Vector2(x + 16 + i * 32, top - 18), 1.8, -1)
 		spr.z_index = -1
 		i += step
+
+## 绿管地标（原创像素，碰撞为实心）
+func _pipe(at: Vector2) -> void:
+	var spr := _sprite(PIPE_TEX, at, 1.0, 1)
+	spr.centered = true
+	_solid(at + Vector2(0, 20), Vector2(40, 90))
+
+## 灰石砖块堆（经典横版中段变化）
+func _stone_stack(x: int, top: int, w: int, h: int) -> void:
+	for row in h:
+		for col in w:
+			_sprite(STONE, Vector2(x + 16 + col * 32, top - row * 32), 1.0, 0)
+	_solid(Vector2(x + w * 16, top - (h - 1) * 16), Vector2(w * 32, h * 32))
 
 func _sprite(tex: Texture2D, at: Vector2, scale: float, z: int) -> Sprite2D:
 	var s := Sprite2D.new()
