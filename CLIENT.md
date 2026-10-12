@@ -1,10 +1,10 @@
-# 客户端专仓
+# 客户端说明（已切主线）
 
-本仓库 **Game-Godot** = 客户端（Godot，可导出桌面/移动）。
+**主客户端 = Unity**：https://github.com/LiangchenLab/Xiuxian-Unity  
+本地：`E:\cw\Xiuxian-Unity`
 
-网页版（Phaser / HTML5）已拆到独立仓库，**后续网页相关改动只进网页仓**：
+本仓 **Game-Godot** = 旧练习 / 归档，不再作为产品主线。
 
-- 远程：https://github.com/LiangchenLab/Xiuxian-Web
-- 本地：`E:\cw\Xiuxian-Game`
+网页版：https://github.com/LiangchenLab/Xiuxian-Web
 
-不要再把网页 Phaser 工程塞进本仓。
+分工：Cursor 监工；Claude Code（ccswitch→MiniMax API）工人。
